@@ -402,7 +402,7 @@ class YouTubeAPI:
             try:
                 res = requests.get(f"http://3.6.210.108:5000/download?query={vid_id}")
                 res.raise_for_status() 
-                response = await res.json()
+                response = res.json()
                 fpath = f"downloads/{vid_id}.mp3"
                 download_folder = "downloads"
                 os.makedirs(download_folder, exist_ok=True)
