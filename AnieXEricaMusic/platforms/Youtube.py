@@ -14,56 +14,37 @@ import os
 import glob
 import random
 import logging
-
-import requests
-import glob
-import os
-import random
-
-
-import os
 import aiohttp
 
 async def download_song(link: str):
     song_url = f"http://3.6.210.108:5000/download?query={link}"
-    
     async with aiohttp.ClientSession() as session:
         try:
             async with session.get(song_url) as response:
-                response.raise_for_status()  # Raise an exception for non-2xx status codes
-                data = await response.json()  # Parse the JSON response
-                
-                # Extract details from the response
+                response.raise_for_status() 
+                data = await response.json() 
                 download_url = data.get("download_url")
                 title = data.get("title")
-                thumb = data.get("thumb")  # Unused here, but you can use it for metadata or thumbnail
-                url = data.get("url")  # Unused here, but could be useful for logging
-
+                thumb = data.get("thumb")  
+                url = data.get("url")
                 if not download_url:
                     print("Download URL not found.")
                     return None
-                
-                # Create a safe filename using the song title, fallback to 'unknown_song'
                 safe_title = title.replace("/", "_").replace("\\", "_").replace(":", "_")
-                file_name = f"{safe_title}.mp3"  # Use song title as the file name
+                file_name = f"{safe_title}.mp3" 
                 download_folder = "downloads"
-                os.makedirs(download_folder, exist_ok=True)  # Create folder if it doesn't exist
-                file_path = os.path.join(download_folder, file_name)  # Full path to save the song
-                
-                # Download the song in chunks
+                os.makedirs(download_folder, exist_ok=True)  
+                file_path = os.path.join(download_folder, file_name) 
                 async with session.get(download_url) as file_response:
-                    file_response.raise_for_status()  # Ensure the request was successful
-                    
+                    file_response.raise_for_status()
                     with open(file_path, 'wb') as f:
                         while True:
-                            chunk = await file_response.content.read(1024)  # Read in 1KB chunks
+                            chunk = await file_response.content.read(8192) 
                             if not chunk:
-                                break  # Break when no more data
-                            f.write(chunk)  # Write chunk to file
-
+                                break 
+                            f.write(chunk)
                     print(f"Song downloaded successfully: {file_name}")
-                    return file_path  # Return the path of the saved file
-
+                    return file_path 
         except aiohttp.ClientError as e:
             print(f"Network or client error occurred: {e}")
         except Exception as e:
