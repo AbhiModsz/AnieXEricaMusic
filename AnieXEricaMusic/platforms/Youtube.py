@@ -418,31 +418,27 @@ class YouTubeAPI:
                 # Get download information from proxy
                 res = requests.get(f"http://3.6.210.108:5000/download?query={vid_id}", timeout=30)
                 response = res.json()
-
-                if response['status'] == 'success':
-                    fpath = f"downloads/{vid_id}.{response['ext']}"
-                    download_link = response['download_url']
-                    with requests.get(download_link, stream=True) as data:
-                        data.raise_for_status()
-
-                        with open(fpath, "wb") as f:
-                            for chunk in data.iter_content(chunk_size=8192):
-                                if chunk:
-                                    f.write(chunk)
-                        return fpath
-                else:
-                    LOGGER(__name__).error(f"Proxy returned error status: {response.get('error', 'Unknown')}")
-                    return None
-
-            except requests.exceptions.RequestException as e:
-                LOGGER(__name__).error(f"Network error while downloading: {str(e)}")
+                fpath = f"downloads/{vid_id}.{response['ext']}"
+                download_link = response['download_url']
+                with requests.get(download_link, stream=True) as data:
+                    data.raise_for_status()
+                    with open(fpath, "wb") as f:
+                        for chunk in data.iter_content(chunk_size=8192):
+                            if chunk:
+                                f.write(chunk)
+                    return fpath
+            else:
+                LOGGER(__name__).error(f"Proxy returned error status: {response.get('error', 'Unknown')}")
                 return None
-            except json.JSONDecodeError as e:
-                LOGGER(__name__).error(f"Invalid response from proxy: {str(e)}")
-                return None
-            except Exception as e:
-                LOGGER(__name__).error(f"Error in downloading song: {str(e)}")
-                return None
+        except requests.exceptions.RequestException as e:
+            LOGGER(__name__).error(f"Network error while downloading: {str(e)}")
+            return None
+        except json.JSONDecodeError as e:
+            LOGGER(__name__).error(f"Invalid response from proxy: {str(e)}")
+            return None
+        except Exception as e:
+            LOGGER(__name__).error(f"Error in downloading song: {str(e)}")
+            return None
 
         def video_dl():
             ydl_optssx = {
