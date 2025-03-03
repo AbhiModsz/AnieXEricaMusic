@@ -400,23 +400,28 @@ class YouTubeAPI:
 
         def audio_dl(vid_id):
             try:
-                res = requests.get(f"http://3.6.210.108:5000/download?query={vid_id}")
-                res.raise_for_status() 
-                response = res.json()
-                fpath = f"downloads/{vid_id}.mp3"
-                download_folder = "downloads"
-                os.makedirs(download_folder, exist_ok=True)
-                file_name = f"{vid_id}.mp3" 
-                file_path = os.path.join(download_folder, file_name)
-                download_link = response['download_url']
-                async with session.get(download_link) as file_response:
-                    file_response.raise_for_status()
-                with open(file_path, 'wb') as f:
-                    while True:
-                        chunk = await file_response.content.read(8192)
-                        if not chunk:
-                            break
-                        f.write(chunk)
+                 song_url = f"http://3.6.210.108:5000/download?query={vid_id}"
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(song_url) as response:
+                        response.raise_for_status()
+                        data = await response.json()
+                        download_url = data.get("download_url")
+                        title = data.get("title")
+                        thumb = data.get("thumb")
+                        url = data.get("url")
+                       if download_url:
+                           download_folder = "downloads"
+                           os.makedirs(download_folder, exist_ok=True)
+                           file_name = f"{vid_id}.mp3" 
+                           fpath = os.path.join(download_folder, file_name)
+                       async with session.get(download_url) as file_response:
+                            file_response.raise_for_status() 
+                            with open(fpath, 'wb') as f:
+                                 while True:
+                                     chunk = await file_response.content.read(1024)
+                                     if not chunk:
+                                         break
+                                    f.write(chunk)
                 return fpath
             except requests.exceptions.RequestException as e:
                 LOGGER.error(f"Network error while downloading: {str(e)}")
