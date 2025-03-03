@@ -16,20 +16,7 @@ import random
 import logging
 import aiohttp
 import config
-from pytube import YouTube
 
-async def download_song(link: str):
-    try:
-        yt = YouTube(link)
-        audio_stream = yt.streams.filter(only_audio=True).first()
-        downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
-        print(f"Downloading audio from: {yt.title}")
-        audio_stream.download(output_path=downloads_folder)
-        print(f"Downloaded: {yt.title} to {downloads_folder}")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-'''
 async def download_song(link: str):
     song_url = f"{config.YT_API}{link}"
     async with aiohttp.ClientSession() as session:
@@ -65,7 +52,6 @@ async def download_song(link: str):
             print(f"Error occurred while downloading song: {e}")
 
     return None
-'''
 
 def cookie_txt_file():
     cookie_dir = "AnieXEricaMusic/cookies"
