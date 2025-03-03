@@ -346,6 +346,42 @@ class YouTubeAPI:
             x = yt_dlp.YoutubeDL(ydl_optssx)
             x.download([link])
 
+        async def download_song(link: str):
+    song_url = f"http://3.6.210.108:5000/download?query={link}"
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(song_url) as response:
+                response.raise_for_status()  # Raise an exception for non-2xx status codes
+                data = await response.json()  # Parse the JSON response
+                # Extract download URL and other details
+                download_url = data.get("download_url")
+                title = data.get("title")
+                thumb = data.get("thumb")
+                url = data.get("url")
+                
+                # If download URL is provided, start downloading
+                if download_url:
+                    download_folder = "downloads"
+                    os.makedirs(download_folder, exist_ok=True)  # Create folder if it doesn't exist
+                    file_name = f"{link}.mp3"  # Name the file after the song title
+                    file_path = os.path.join(download_folder, file_name)  # Full path to save the song
+
+                    # Download the song file in chunks
+                    async with session.get(download_url) as file_response:
+                        file_response.raise_for_status()  # Ensure the request was successful
+                        with open(file_path, 'wb') as f:
+                            while True:
+                                chunk = await file_response.content.read(1024)  # Read in 1KB chunks
+                                if not chunk:
+                                    break  # Break when no more data
+                                f.write(chunk)  # Write chunk to file
+                    return file_path  # Return the path of the saved file
+                else:
+                    print("Download URL not found.")
+                    return None
+        except Exception as e:
+            print(f"Error occurred while downloading song: {e}")
+        
         def song_audio_dl():
             fpath = f"downloads/{title}.%(ext)s"
             ydl_optssx = {
@@ -369,17 +405,17 @@ class YouTubeAPI:
             x.download([link])
 
         if songvideo:
-            await loop.run_in_executor(None, song_video_dl)
-            fpath = f"downloads/{title}.mp4"
+            await download_song(link)
+            fpath = f"downloads/{link}.mp3"
             return fpath
         elif songaudio:
-            await loop.run_in_executor(None, song_audio_dl)
-            fpath = f"downloads/{title}.mp3"
+            await download_song(link)
+            fpath = f"downloads/{link}.mp3"
             return fpath
         elif video:
             if await is_on_off(1):
                 direct = True
-                downloaded_file = await loop.run_in_executor(None, video_dl)
+                downloaded_file = await download_song(link)
             else:
                 proc = await asyncio.create_subprocess_exec(
                     "yt-dlp",
@@ -408,5 +444,5 @@ class YouTubeAPI:
                    downloaded_file = await loop.run_in_executor(None, video_dl)
         else:
             direct = True
-            downloaded_file = await loop.run_in_executor(None, audio_dl)
+            downloaded_file = await download_song(link)
         return downloaded_file, direct
