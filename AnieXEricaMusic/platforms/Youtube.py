@@ -400,20 +400,17 @@ class YouTubeAPI:
 
         def audio_dl(vid_id):
             try:
-                for ext in ['mp3', 'm4a', 'webm']:
-                    fpath = f"downloads/{vid_id}.mp3"
-                    if os.path.exists(fpath):
-                        return fpath
                 res = requests.get(f"http://3.6.210.108:5000/download?query={vid_id}")
                 res.raise_for_status() 
-                response = res.json()
+                response = await res.json()
                 fpath = f"downloads/{vid_id}.mp3"
                 download_folder = "downloads"
                 os.makedirs(download_folder, exist_ok=True)
                 file_name = f"{vid_id}.mp3" 
                 file_path = os.path.join(download_folder, file_name)
                 download_link = response['download_url']
-                data.raise_for_status()
+                async with session.get(download_link) as file_response:
+                    file_response.raise_for_status()
                 with open(file_path, 'wb') as f:
                     while True:
                         chunk = await file_response.content.read(8192)
