@@ -14,12 +14,45 @@ import os
 import glob
 import random
 import logging
-
 import requests
 import glob
 import os
 import random
 
+async def YTSONG(vid_id):
+    try:
+        song_url = f"http://3.6.210.108:5000/download?query={vid_id}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(song_url) as response:
+                response.raise_for_status()
+                data = await response.json()
+                download_url = data.get("download_url")
+                title = data.get("title")
+                thumb = data.get("thumb")
+                url = data.get("url")
+                if download_url:
+                    for FILES in ['mp3', 'm4a', 'webm']:
+                        SONGS = f"downloads/{vid_id}.{FILES}"
+                    if os.path.exists(SONGS):
+                        return SONGS
+                    file_name = f"{vid_id}.mp3" 
+                    SONGS = f"downloads/{file_name}"
+                    async with session.get(download_url) as file_response:
+                        file_response.raise_for_status() 
+                        with open(SONGS, 'wb') as f:
+                            while True:
+                                chunk = await file_response.content.read(1024)
+                                if not chunk:
+                                    break
+                                f.write(chunk) 
+                    if os.path.exists(SONGS):
+                        return SONGS
+                else:
+                    pass
+    except aiohttp.ClientResponseError as e:
+        pass
+    except Exception as e:
+        pass
 
 def cookie_txt_file():
     cookie_dir = "AnieXEricaMusic/cookies"
@@ -293,24 +326,9 @@ class YouTubeAPI:
         if videoid:
             link = self.base + link
         loop = asyncio.get_running_loop()
-        def audio_dl():
-            ydl_optssx = {
-                "format": "bestaudio/best",
-                "outtmpl": "downloads/%(id)s.%(ext)s",
-                "geo_bypass": True,
-                "nocheckcertificate": True,
-                "quiet": True,
-                "cookiefile" : cookie_txt_file(),
-                "no_warnings": True,
-            }
-            x = yt_dlp.YoutubeDL(ydl_optssx)
-            info = x.extract_info(link, False)
-            xyz = os.path.join("downloads", f"{info['id']}.{info['ext']}")
-            if os.path.exists(xyz):
-                return xyz
-            x.download([link])
-            return xyz
-
+        def audio_dl(vid_id):
+            await YTSONG(vid_id)
+           
         def video_dl():
             ydl_optssx = {
                 "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
@@ -408,5 +426,5 @@ class YouTubeAPI:
                    downloaded_file = await loop.run_in_executor(None, video_dl)
         else:
             direct = True
-            downloaded_file = await loop.run_in_executor(None, audio_dl)
+            downloaded_file = await loop.run_in_executor(None, lambda:audio_dl(vid_id))
         return downloaded_file, direct
