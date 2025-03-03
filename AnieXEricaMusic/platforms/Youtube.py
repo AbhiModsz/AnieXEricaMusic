@@ -2,31 +2,30 @@ import asyncio
 import os
 import re
 import json
-from typing import Union
-import requests
+import random
+import logging
 import yt_dlp
 from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from youtubesearchpython.__future__ import VideosSearch, CustomSearch
+import aiohttp
 
 from AnieXEricaMusic.utils.database import is_on_off
 from AnieXEricaMusic.utils.formatters import time_to_seconds
 from AnieXEricaMusic import LOGGER
 
 
-import os
-import glob
-import random
-import logging
-
-
+# Helper function to get a random cookie file
 def cookie_txt_file():
     cookie_dir = "AnieXEricaMusic/cookies"
     cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
+    if cookies_files:
+        cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
+        return cookie_file
+    return None  # Return None if no cookie file is found
 
-    cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
-    return cookie_file
 
+# Async function to check the file size of the video
 async def check_file_size(link):
     async def get_format_info(link):
         proc = await asyncio.create_subprocess_exec(
@@ -62,6 +61,8 @@ async def check_file_size(link):
     total_size = parse_size(formats)
     return total_size
 
+
+# Function to execute shell commands asynchronously
 async def shell_cmd(cmd):
     proc = await asyncio.create_subprocess_shell(
         cmd,
@@ -77,6 +78,7 @@ async def shell_cmd(cmd):
     return out.decode("utf-8")
 
 
+# Main YouTubeAPI class to manage YouTube video fetching and processing
 class YouTubeAPI:
     def __init__(self):
         self.base = "https://www.youtube.com/watch?v="
@@ -94,7 +96,6 @@ class YouTubeAPI:
             for result in search_results:
                 duration_str = result.get("duration", "0:00")
 
-                # Convert duration to seconds
                 try:
                     parts = duration_str.split(":")
                     duration_secs = 0
@@ -238,7 +239,7 @@ class YouTubeAPI:
 
         proc = await asyncio.create_subprocess_exec(
             "yt-dlp",
-            "--cookies",cookie_txt_file(),
+            "--cookies", cookie_txt_file(),
             "-g",
             "-f",
             "best[height<=?720][width<=?1280]",
@@ -251,136 +252,6 @@ class YouTubeAPI:
             return 1, stdout.decode().split("\n")[0]
         else:
             return 0, stderr.decode()
-
-    async def playlist(self, link, limit, user_id, videoid: Union[bool, str] = None):
-        if videoid:
-            link = self.listbase + link
-        if "&" in link:
-            link = link.split("&")[0]
-        if "?si=" in link:
-            link = link.split("?si=")[0]
-        elif "&si=" in link:
-            link = link.split("&si=")[0]
-        playlist = await shell_cmd(
-            f"yt-dlp -i --get-id --flat-playlist --cookies {cookie_txt_file()} --playlist-end {limit} --skip-download {link}"
-        )
-        try:
-            result = playlist.split("\n")
-            for key in result:
-                if key == "":
-                    result.remove(key)
-        except:
-            result = []
-        return result
-
-    async def track(self, link: str, videoid: Union[bool, str] = None):
-        if videoid:
-            link = self.base + link
-        if "&" in link:
-            link = link.split("&")[0]
-        if "?si=" in link:
-            link = link.split("?si=")[0]
-        elif "&si=" in link:
-            link = link.split("&si=")[0]
-
-        result = await self._get_video_details(link)
-        if not result:
-            raise ValueError("No suitable video found (duration > 1 hour or video unavailable)")
-
-        track_details = {
-            "title": result["title"],
-            "link": result["link"],
-            "vidid": result["id"],
-            "duration_min": result["duration"],
-            "thumb": result["thumbnails"][0]["url"].split("?")[0],
-        }
-        return track_details, result["id"]
-
-    async def formats(self, link: str, videoid: Union[bool, str] = None):
-        if videoid:
-            link = self.base + link
-        if "&" in link:
-            link = link.split("&")[0]
-        if "?si=" in link:
-            link = link.split("?si=")[0]
-        elif "&si=" in link:
-            link = link.split("&si=")[0]
-        ytdl_opts = {"quiet": True, "cookiefile" : cookie_txt_file()}
-        ydl = yt_dlp.YoutubeDL(ytdl_opts)
-        with ydl:
-            formats_available = []
-            r = ydl.extract_info(link, download=False)
-            for format in r["formats"]:
-                try:
-                    str(format["format"])
-                except:
-                    continue
-                if not "dash" in str(format["format"]).lower():
-                    try:
-                        format["format"]
-                        format["filesize"]
-                        format["format_id"]
-                        format["ext"]
-                        format["format_note"]
-                    except:
-                        continue
-                    formats_available.append(
-                        {
-                            "format": format["format"],
-                            "filesize": format["filesize"],
-                            "format_id": format["format_id"],
-                            "ext": format["ext"],
-                            "format_note": format["format_note"],
-                            "yturl": link,
-                        }
-                    )
-        return formats_available, link
-
-    async def slider(self, link: str, query_type: int, videoid: Union[bool, str] = None):
-        if videoid:
-            link = self.base + link
-        if "&" in link:
-            link = link.split("&")[0]
-        if "?si=" in link:
-            link = link.split("?si=")[0]
-        elif "&si=" in link:
-            link = link.split("&si=")[0]
-
-        try:
-            results = []
-            search = VideosSearch(link, limit=10)
-            search_results = (await search.next()).get("result", [])
-
-            # Filter videos longer than 1 hour
-            for result in search_results:
-                duration_str = result.get("duration", "0:00")
-                try:
-                    parts = duration_str.split(":")
-                    duration_secs = 0
-                    if len(parts) == 3:
-                        duration_secs = int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
-                    elif len(parts) == 2:
-                        duration_secs = int(parts[0]) * 60 + int(parts[1])
-
-                    if duration_secs <= 3600:
-                        results.append(result)
-                except (ValueError, IndexError):
-                    continue
-
-            if not results or query_type >= len(results):
-                raise ValueError("No suitable videos found within duration limit")
-
-            selected = results[query_type]
-            return (
-                selected["title"],
-                selected["duration"],
-                selected["thumbnails"][0]["url"].split("?")[0],
-                selected["id"]
-            )
-
-        except Exception as e:
-            LOGGER(__name__).error(f"Error in slider: {str(e)}")
-            raise ValueError("Failed to fetch video details")
 
     async def download(
         self,
@@ -527,8 +398,5 @@ class YouTubeAPI:
                      print(f"File size {total_size_mb:.2f} MB exceeds the 100MB limit.")
                      return None
                    direct = True
-                   downloaded_file = await loop.run_in_executor(None, video_dl)
-        else:
-            direct = True
-            downloaded_file = await loop.run_in_executor(None, lambda:audio_dl(vid_id))
-        return downloaded_file, direct
+                   downloaded_file = await loop.run_in_executor(None, audio_dl)
+            return downloaded_file
