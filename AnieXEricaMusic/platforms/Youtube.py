@@ -8,8 +8,8 @@ import yt_dlp
 from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from youtubesearchpython.__future__ import VideosSearch
-from AnieXEricaMusic.utils.database import is_on_off
-from AnieXEricaMusic.utils.formatters import time_to_seconds
+from AviaxMusic.utils.database import is_on_off
+from AviaxMusic.utils.formatters import time_to_seconds
 import os
 import glob
 import random
@@ -17,7 +17,7 @@ import logging
 import aiohttp
 
 async def download_song(link: str):
-    song_url = f"http://3.6.210.108:5000/download?query={link}"
+    song_url = f"{YT_API}{link}"
     async with aiohttp.ClientSession() as session:
         try:
             async with session.get(song_url) as response:
@@ -53,11 +53,15 @@ async def download_song(link: str):
     return None
 
 def cookie_txt_file():
-    cookie_dir = "AnieXEricaMusic/cookies"
-    cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
-
-    cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
-    return cookie_file
+    folder_path = f"{os.getcwd()}/cookies"
+    filename = f"{os.getcwd()}/cookies/logs.csv"
+    txt_files = glob.glob(os.path.join(folder_path, '*.txt'))
+    if not txt_files:
+        raise FileNotFoundError("No .txt files found in the specified folder.")
+    cookie_txt_file = random.choice(txt_files)
+    with open(filename, 'a') as file:
+        file.write(f'Choosen File : {cookie_txt_file}\n')
+    return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
 
 
 async def check_file_size(link):
