@@ -15,9 +15,10 @@ import glob
 import random
 import logging
 import aiohttp
+import config
 
 async def download_song(link: str):
-    song_url = f"{YT_API}{link}"
+    song_url = f"{config.YT_API}{link}"
     async with aiohttp.ClientSession() as session:
         try:
             async with session.get(song_url) as response:
