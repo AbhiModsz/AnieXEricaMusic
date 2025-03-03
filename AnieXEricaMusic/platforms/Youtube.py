@@ -414,14 +414,14 @@ class YouTubeAPI:
                             os.makedirs(download_folder, exist_ok=True)
                             file_name = f"{vid_id}.mp3" 
                             fpath = os.path.join(download_folder, file_name)
-                       async with session.get(download_url) as file_response:
-                            file_response.raise_for_status() 
-                            with open(fpath, 'wb') as f:
-                                 while True:
-                                     chunk = await file_response.content.read(1024)
-                                     if not chunk:
-                                         break
-                                    f.write(chunk)
+                            async with session.get(download_url) as file_response:
+                                file_response.raise_for_status() 
+                                with open(fpath, 'wb') as f:
+                                    while True:
+                                        chunk = await file_response.content.read(1024)
+                                        if not chunk:
+                                            break
+                                        f.write(chunk)
                 return fpath
             except requests.exceptions.RequestException as e:
                 LOGGER.error(f"Network error while downloading: {str(e)}")
