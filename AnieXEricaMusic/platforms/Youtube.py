@@ -326,8 +326,9 @@ class YouTubeAPI:
         if videoid:
             link = self.base + link
         loop = asyncio.get_running_loop()
-        def audio_dl(vid_id):
+        async def audio_dl(vid_id):
             await YTSONG(vid_id)
+
            
         def video_dl():
             ydl_optssx = {
