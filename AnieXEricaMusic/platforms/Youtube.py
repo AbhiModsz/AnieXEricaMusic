@@ -396,42 +396,6 @@ class YouTubeAPI:
             x = yt_dlp.YoutubeDL(ydl_optssx)
             x.download([link])
 
-        async def download_song(link: str):
-    song_url = f"http://3.6.210.108:5000/download?query={link}"
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.get(song_url) as response:
-                response.raise_for_status()  # Raise an exception for non-2xx status codes
-                data = await response.json()  # Parse the JSON response
-                # Extract download URL and other details
-                download_url = data.get("download_url")
-                title = data.get("title")
-                thumb = data.get("thumb")
-                url = data.get("url")
-                
-                # If download URL is provided, start downloading
-                if download_url:
-                    download_folder = "downloads"
-                    os.makedirs(download_folder, exist_ok=True)  # Create folder if it doesn't exist
-                    file_name = f"{link}.mp3"  # Name the file after the song title
-                    file_path = os.path.join(download_folder, file_name)  # Full path to save the song
-
-                    # Download the song file in chunks
-                    async with session.get(download_url) as file_response:
-                        file_response.raise_for_status()  # Ensure the request was successful
-                        with open(file_path, 'wb') as f:
-                            while True:
-                                chunk = await file_response.content.read(1024)  # Read in 1KB chunks
-                                if not chunk:
-                                    break  # Break when no more data
-                                f.write(chunk)  # Write chunk to file
-                    return file_path  # Return the path of the saved file
-                else:
-                    print("Download URL not found.")
-                    return None
-        except Exception as e:
-            print(f"Error occurred while downloading song: {e}")
-        
         def song_audio_dl():
             fpath = f"downloads/{title}.%(ext)s"
             ydl_optssx = {
