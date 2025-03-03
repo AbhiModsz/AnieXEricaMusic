@@ -269,40 +269,42 @@ class YouTubeAPI:
             link = self.base + link
         loop = asyncio.get_running_loop()
 
-        def audio_dl(vid_id):
-            try:
-                song_url = f"http://3.6.210.108:5000/download?query={vid_id}"
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(song_url) as response:
-                        response.raise_for_status()
-                        data = await response.json()
-                        download_url = data.get("download_url")
-                        title = data.get("title")
-                        thumb = data.get("thumb")
-                        url = data.get("url")
-                        if download_url:
-                            download_folder = "downloads"
-                            os.makedirs(download_folder, exist_ok=True)
-                            file_name = f"{vid_id}.mp3" 
-                            fpath = os.path.join(download_folder, file_name)
-                            async with session.get(download_url) as file_response:
-                                file_response.raise_for_status() 
-                                with open(fpath, 'wb') as f:
-                                    while True:
-                                        chunk = await file_response.content.read(1024)
-                                        if not chunk:
-                                            break
-                                        f.write(chunk)
-                return fpath
-            except requests.exceptions.RequestException as e:
-                LOGGER.error(f"Network error while downloading: {str(e)}")
-                return None
-            except json.JSONDecodeError as e:
-                LOGGER.error(f"Invalid response from proxy: {str(e)}")
-                return None
-            except Exception as e:
-                LOGGER.error(f"Error in downloading audio: {str(e)}")
-                return None
+
+async def audio_dl(vid_id):
+    try:
+        song_url = f"http://3.6.210.108:5000/download?query={vid_id}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(song_url) as response:
+                response.raise_for_status()
+                data = await response.json()
+                download_url = data.get("download_url")
+                title = data.get("title")
+                thumb = data.get("thumb")
+                url = data.get("url")
+                if download_url:
+                    download_folder = "downloads"
+                    os.makedirs(download_folder, exist_ok=True)
+                    file_name = f"{vid_id}.mp3" 
+                    fpath = os.path.join(download_folder, file_name)
+                    async with session.get(download_url) as file_response:
+                        file_response.raise_for_status() 
+                        with open(fpath, 'wb') as f:
+                            while True:
+                                chunk = await file_response.content.read(1024)
+                                if not chunk:
+                                    break
+                                f.write(chunk)
+        return fpath
+    except requests.exceptions.RequestException as e:
+        LOGGER.error(f"Network error while downloading: {str(e)}")
+        return None
+    except json.JSONDecodeError as e:
+        LOGGER.error(f"Invalid response from proxy: {str(e)}")
+        return None
+    except Exception as e:
+        LOGGER.error(f"Error in downloading audio: {str(e)}")
+        return None
+
 
         def video_dl():
             ydl_optssx = {
