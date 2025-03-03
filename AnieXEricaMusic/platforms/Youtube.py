@@ -409,11 +409,11 @@ class YouTubeAPI:
                         title = data.get("title")
                         thumb = data.get("thumb")
                         url = data.get("url")
-                       if download_url:
-                           download_folder = "downloads"
-                           os.makedirs(download_folder, exist_ok=True)
-                           file_name = f"{vid_id}.mp3" 
-                           fpath = os.path.join(download_folder, file_name)
+                        if download_url:
+                            download_folder = "downloads"
+                            os.makedirs(download_folder, exist_ok=True)
+                            file_name = f"{vid_id}.mp3" 
+                            fpath = os.path.join(download_folder, file_name)
                        async with session.get(download_url) as file_response:
                             file_response.raise_for_status() 
                             with open(fpath, 'wb') as f:
