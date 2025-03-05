@@ -26,12 +26,11 @@ def cookie_txt_file():
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
 
+YT_API = "http://3.6.210.108:5000/download?query="
+AMBOT = "http://3.6.210.108:5000" 
 
 async def download_song(link: str):
-    # Define the base URL for API (if it's missing from your config)
-    AMBOT = "http://3.6.210.108:5000"  # replace with the actual base URL
-    song_url = f"{config.YT_API}{link}"
-
+    song_url = f"{YT_API}{link}"
     async with aiohttp.ClientSession() as session:
         try:
             # Fetch song data
