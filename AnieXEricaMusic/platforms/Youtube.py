@@ -17,7 +17,7 @@ import logging
 import aiohttp
 import config
 
-AMBOT = f"http://3.6.210.108:5000"
+
 
 def cookie_txt_file():
     cookie_dir = "AnieXEricaMusic/cookies"
@@ -28,20 +28,30 @@ def cookie_txt_file():
 
 
 async def download_song(link: str):
+    # Define the base URL for API (if it's missing from your config)
+    AMBOT = "http://3.6.210.108:5000"  # replace with the actual base URL
     song_url = f"{config.YT_API}{link}"
+
     async with aiohttp.ClientSession() as session:
         try:
+            # Fetch song data
             async with session.get(song_url) as response:
                 data = await response.json()
-                print(data)
+                print(data)  # Debugging: prints the API response
+                
                 download_url = data.get("download_url")
+                title = data.get("title", "default_title")  # Ensure title exists
                 safe_title = title.replace("/", "_").replace("\\", "_").replace(":", "_")
                 file_name = f"{safe_title}.mp3"
                 download_folder = "downloads"
-                os.makedirs(download_folder, exist_ok=True)  
+                os.makedirs(download_folder, exist_ok=True)
                 file_path = os.path.join(download_folder, file_name)
+                
+                # Construct full download URL
                 download = f"{AMBOT}{download_url}"
-                print(download)
+                print(f"Download URL: {download}")  # Debugging: print the full download URL
+
+                # Download the file
                 async with session.get(download) as file_response:
                     with open(file_path, 'wb') as f:
                         while True:
@@ -57,6 +67,7 @@ async def download_song(link: str):
             print(f"Error occurred while downloading song: {e}")
 
     return None
+
 
 async def check_file_size(link):
     async def get_format_info(link):
