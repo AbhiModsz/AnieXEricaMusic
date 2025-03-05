@@ -25,18 +25,16 @@ async def download_song(link: str):
                 response.raise_for_status() 
                 data = await response.json() 
                 download_url = data.get("download_url")
-                title = data.get("title")
-                thumb = data.get("thumb")  
-                url = data.get("url")
                 if not download_url:
                     print("Download URL not found.")
                     return None
                 safe_title = title.replace("/", "_").replace("\\", "_").replace(":", "_")
                 file_name = f"{safe_title}.mp3" 
                 download_folder = "downloads"
+                download = f"{config.YT_API}{download_url}"
                 os.makedirs(download_folder, exist_ok=True)  
                 file_path = os.path.join(download_folder, file_name) 
-                async with session.get(download_url) as file_response:
+                async with session.get(download) as file_response:
                     file_response.raise_for_status()
                     with open(file_path, 'wb') as f:
                         while True:
@@ -54,11 +52,16 @@ async def download_song(link: str):
     return None
 
 def cookie_txt_file():
-    cookie_dir = "AnieXEricaMusic/cookies"
-    cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
+    folder_path = f"{os.getcwd()}/cookies"
+    filename = f"{os.getcwd()}/cookies/logs.csv"
+    txt_files = glob.glob(os.path.join(folder_path, '*.txt'))
+    if not txt_files:
+        raise FileNotFoundError("No .txt files found in the specified folder.")
+    cookie_txt_file = random.choice(txt_files)
+    with open(filename, 'a') as file:
+        file.write(f'Choosen File : {cookie_txt_file}\n')
+    return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
 
-    cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
-    return cookie_file
 
 async def check_file_size(link):
     async def get_format_info(link):
@@ -441,3 +444,13 @@ class YouTubeAPI:
             direct = True
             downloaded_file = await download_song(link)
         return downloaded_file, direct
+
+
+def cookie_txt_file():
+    cookie_dir = "AnieXEricaMusic/cookies"
+    cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
+
+    cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
+    return cookie_file
+
+
