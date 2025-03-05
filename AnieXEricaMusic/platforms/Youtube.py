@@ -17,6 +17,7 @@ import logging
 import aiohttp
 import config
 
+AMBOT = f"http://3.6.210.108:5000"
 async def download_song(link: str):
     song_url = f"{config.YT_API}{link}"
     async with aiohttp.ClientSession() as session:
@@ -35,7 +36,7 @@ async def download_song(link: str):
                 download_folder = "downloads"
                 os.makedirs(download_folder, exist_ok=True)  
                 file_path = os.path.join(download_folder, file_name)
-                download = f"{config.YT_API}{download_url}"
+                download = f"{AMBOT}{download_url}"
                 print(download)
                 async with session.get(download) as file_response:
                     file_response.raise_for_status()
