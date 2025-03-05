@@ -18,6 +18,15 @@ import aiohttp
 import config
 
 AMBOT = f"http://3.6.210.108:5000"
+
+def cookie_txt_file():
+    cookie_dir = "AnieXEricaMusic/cookies"
+    cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
+
+    cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
+    return cookie_file
+
+
 async def download_song(link: str):
     song_url = f"{config.YT_API}{link}"
     async with aiohttp.ClientSession() as session:
@@ -56,18 +65,6 @@ async def download_song(link: str):
             print(f"Error occurred while downloading song: {e}")
 
     return None
-
-def cookie_txt_file():
-    folder_path = f"{os.getcwd()}/cookies"
-    filename = f"{os.getcwd()}/cookies/logs.csv"
-    txt_files = glob.glob(os.path.join(folder_path, '*.txt'))
-    if not txt_files:
-        raise FileNotFoundError("No .txt files found in the specified folder.")
-    cookie_txt_file = random.choice(txt_files)
-    with open(filename, 'a') as file:
-        file.write(f'Choosen File : {cookie_txt_file}\n')
-    return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
-
 
 async def check_file_size(link):
     async def get_format_info(link):
@@ -451,12 +448,5 @@ class YouTubeAPI:
             downloaded_file = await download_song(link)
         return downloaded_file, direct
 
-
-def cookie_txt_file():
-    cookie_dir = "AnieXEricaMusic/cookies"
-    cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
-
-    cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
-    return cookie_file
 
 
