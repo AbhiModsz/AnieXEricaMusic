@@ -24,6 +24,7 @@ async def download_song(link: str):
             async with session.get(song_url) as response:
                 response.raise_for_status()
                 data = await response.json()
+                print(data)
                 download_url = data.get("download_url")
                 title = data.get("title", "unknown_title")
                 if not download_url:
