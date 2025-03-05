@@ -22,28 +22,32 @@ async def download_song(link: str):
     async with aiohttp.ClientSession() as session:
         try:
             async with session.get(song_url) as response:
-                response.raise_for_status() 
-                data = await response.json() 
+                response.raise_for_status()
+                data = await response.json()
                 download_url = data.get("download_url")
+                title = data.get("title", "unknown_title")
                 if not download_url:
                     print("Download URL not found.")
                     return None
                 safe_title = title.replace("/", "_").replace("\\", "_").replace(":", "_")
-                file_name = f"{safe_title}.mp3" 
+                file_name = f"{safe_title}.mp3"
                 download_folder = "downloads"
-                download = f"{config.YT_API}{download_url}"
                 os.makedirs(download_folder, exist_ok=True)  
-                file_path = os.path.join(download_folder, file_name) 
+                file_path = os.path.join(download_folder, file_name)
+                download = f"{config.YT_API}{download_url}"
+                print(download)
                 async with session.get(download) as file_response:
                     file_response.raise_for_status()
                     with open(file_path, 'wb') as f:
                         while True:
-                            chunk = await file_response.content.read(8192) 
+                            chunk = await file_response.content.read(8192)
                             if not chunk:
-                                break 
+                                break
                             f.write(chunk)
+                    
                     print(f"Song downloaded successfully: {file_name}")
-                    return file_path 
+                    return file_path
+
         except aiohttp.ClientError as e:
             print(f"Network or client error occurred: {e}")
         except Exception as e:
