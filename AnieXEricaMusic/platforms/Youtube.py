@@ -31,25 +31,18 @@ AMBOT = "http://s48swsks0cso04ks0k8gwgck.159.223.45.194.sslip.io/"
 async def download_song(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
     song_url = f"{AMBOT}song/{video_id}?api=PiyushR"
-    
     async with aiohttp.ClientSession() as session:
         try:
-            # Fetch song data
             async with session.get(song_url) as response:
                 data = await response.json()
-                print(data)  # Debugging: prints the API response
-                
+                print(data)
                 download_url = data.get("link")
                 file_name = f"{video_id}.mp3"
                 download_folder = "downloads"
                 os.makedirs(download_folder, exist_ok=True)
                 file_path = os.path.join(download_folder, file_name)
-                
-                # Construct full download URL
                 download = f"{AMBOT}{download_url}"
-                print(f"Download URL: {download}")  # Debugging: print the full download URL
-
-                # Download the file
+                print(f"Download URL: {download}")
                 async with session.get(download) as file_response:
                     with open(file_path, 'wb') as f:
                         while True:
@@ -57,6 +50,7 @@ async def download_song(link: str):
                             if not chunk:
                                 break
                             f.write(chunk)
+                    print(f"{file_path}")
                     return file_path
 
         except aiohttp.ClientError as e:
