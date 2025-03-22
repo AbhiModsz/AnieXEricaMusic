@@ -14,9 +14,11 @@ import os
 import glob
 import random
 import logging
-import aiohttp
-import config
 
+import requests
+import glob
+import os
+import random
 
 
 def cookie_txt_file():
@@ -26,51 +28,6 @@ def cookie_txt_file():
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
 
-async def download_song(link: str):
-    # Extract video ID from the YouTube link (removes everything except the video ID)
-    video_id = link.split('v=')[-1].split('&')[0]
-
-    # Create the song URL using only the video ID
-    song_url = f"http://ytstream.152.42.161.43.sslip.io/song/{video_id}?api=PiyushR"
-    
-    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=30)) as session:
-        try:
-            # Fetch song data
-            async with session.get(song_url) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    print(data)  # Debugging: prints the API response
-                    
-                    download_url = data.get("link")
-                    if not download_url:
-                        print(f"Error: No download URL found in response.")
-                        return None
-                    
-                    file_name = f"{video_id}.mp3"
-                    download_folder = "downloads"
-                    os.makedirs(download_folder, exist_ok=True)
-                    file_path = os.path.join(download_folder, file_name)
-                    
-                    # Construct full download URL
-                    print(f"Download URL: {download_url}")  # Debugging: print the full download URL
-
-                    # Download the file
-                    async with session.get(download_url) as file_response:
-                        with open(file_path, 'wb') as f:
-                            while True:
-                                chunk = await file_response.content.read(8192)
-                                if not chunk:
-                                    break
-                                f.write(chunk)
-                    return file_path
-                else:
-                    print(f"Error: Server responded with status {response.status}")
-        except aiohttp.ClientError as e:
-            print(f"Network or client error occurred: {e}")
-        except Exception as e:
-            print(f"Error occurred while downloading song: {e}")
-
-    return None
 
 async def check_file_size(link):
     async def get_format_info(link):
@@ -412,17 +369,17 @@ class YouTubeAPI:
             x.download([link])
 
         if songvideo:
-            await download_song(link)
-            fpath = f"downloads/{link}.mp3"
+            await loop.run_in_executor(None, song_video_dl)
+            fpath = f"downloads/{title}.mp4"
             return fpath
         elif songaudio:
-            await download_song(link)
-            fpath = f"downloads/{link}.mp3"
+            await loop.run_in_executor(None, song_audio_dl)
+            fpath = f"downloads/{title}.mp3"
             return fpath
         elif video:
             if await is_on_off(1):
                 direct = True
-                downloaded_file = await download_song(link)
+                downloaded_file = await loop.run_in_executor(None, video_dl)
             else:
                 proc = await asyncio.create_subprocess_exec(
                     "yt-dlp",
@@ -451,7 +408,5 @@ class YouTubeAPI:
                    downloaded_file = await loop.run_in_executor(None, video_dl)
         else:
             direct = True
-            downloaded_file = await download_song(link)
+            downloaded_file = await loop.run_in_executor(None, audio_dl)
         return downloaded_file, direct
-
-
