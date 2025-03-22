@@ -27,7 +27,12 @@ def cookie_txt_file():
     return cookie_file
 
 async def download_song(link: str):
-    song_url = f"http://ytstream.152.42.161.43.sslip.io/song/{link}?api=PiyushR"
+    # Extract video ID from the YouTube link (removes everything except the video ID)
+    video_id = link.split('v=')[-1].split('&')[0]
+
+    # Create the song URL using only the video ID
+    song_url = f"http://ytstream.152.42.161.43.sslip.io/song/{video_id}?api=PiyushR"
+    
     async with aiohttp.ClientSession() as session:
         try:
             # Fetch song data
@@ -36,7 +41,7 @@ async def download_song(link: str):
                 print(data)  # Debugging: prints the API response
                 
                 download_url = data.get("link")
-                file_name = f"{link}.mp3"
+                file_name = f"{video_id}.mp3"
                 download_folder = "downloads"
                 os.makedirs(download_folder, exist_ok=True)
                 file_path = os.path.join(download_folder, file_name)
@@ -61,7 +66,6 @@ async def download_song(link: str):
             print(f"Error occurred while downloading song: {e}")
 
     return None
-
 
 async def check_file_size(link):
     async def get_format_info(link):
