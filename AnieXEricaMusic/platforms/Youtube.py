@@ -37,20 +37,22 @@ async def download_song(link: str):
                 data = await response.json()
                 print(data)
                 download_url = data.get("link")
-                file_name = f"{video_id}.mp3"
+                file_format = data.get("format", "mp3")  # Default to 'mp3' if no format is found
+                file_extension = file_format.lower()  # Ensure extension is lowercase
+                # Example: If the format is "mp3", the file name will be "video_id.mp3"
+                file_name = f"{video_id}.{file_extension}"
                 download_folder = "downloads"
                 os.makedirs(download_folder, exist_ok=True)
                 file_path = os.path.join(download_folder, file_name)
-                download = f"{AMBOT}{download_url}"
-                print(f"Download URL: {download}")
-                async with session.get(download) as file_response:
+                print(f"Download URL: {download_url}")  # Debug: print the correct URL
+                async with session.get(download_url) as file_response:
                     with open(file_path, 'wb') as f:
                         while True:
                             chunk = await file_response.content.read(8192)
                             if not chunk:
                                 break
                             f.write(chunk)
-                    print(f"{file_path}")
+                    print(f"Downloaded to {file_path}")
                     return file_path
 
         except aiohttp.ClientError as e:
