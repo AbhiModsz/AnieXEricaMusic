@@ -26,9 +26,6 @@ def cookie_txt_file():
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
 
-YT_API = "http://3.6.210.108:5000/download?query="
-AMBOT = "http://3.6.210.108:5000" 
-
 async def download_song(link: str):
     song_url = f"http://ytstream.152.42.161.43.sslip.io/song/{link}?api=PiyushR"
     async with aiohttp.ClientSession() as session:
@@ -38,16 +35,14 @@ async def download_song(link: str):
                 data = await response.json()
                 print(data)  # Debugging: prints the API response
                 
-                download_url = data.get("download_url")
-                title = data.get("title", "default_title")  # Ensure title exists
-                safe_title = title.replace("/", "_").replace("\\", "_").replace(":", "_")
-                file_name = f"{safe_title}.mp3"
+                download_url = data.get("link")
+                file_name = f"{link}.mp3"
                 download_folder = "downloads"
                 os.makedirs(download_folder, exist_ok=True)
                 file_path = os.path.join(download_folder, file_name)
                 
                 # Construct full download URL
-                download = f"{AMBOT}{download_url}"
+                download = f"{download_url}"
                 print(f"Download URL: {download}")  # Debugging: print the full download URL
 
                 # Download the file
