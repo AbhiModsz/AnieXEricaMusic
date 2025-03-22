@@ -38,6 +38,7 @@ async def download_song(link: str):
             # Fetch song data
             async with session.get(song_url) as response:
                 data = await response.json()
+                await asyncio.sleep(2)
                 print(data)  # Debugging: prints the API response
                 
                 download_url = data.get("link")
