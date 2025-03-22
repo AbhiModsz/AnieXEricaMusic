@@ -14,9 +14,11 @@ import os
 import glob
 import random
 import logging
-import aiohttp
-import config
 
+import requests
+import glob
+import os
+import random
 
 
 def cookie_txt_file():
@@ -25,47 +27,6 @@ def cookie_txt_file():
 
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
-
-YT_API = "http://3.6.210.108:5000/download?query="
-AMBOT = "http://3.6.210.108:5000" 
-
-async def download_song(link: str):
-    song_url = f"{YT_API}{link}"
-    async with aiohttp.ClientSession() as session:
-        try:
-            # Fetch song data
-            async with session.get(song_url) as response:
-                data = await response.json()
-                print(data)  # Debugging: prints the API response
-                
-                download_url = data.get("download_url")
-                title = data.get("title", "default_title")  # Ensure title exists
-                safe_title = title.replace("/", "_").replace("\\", "_").replace(":", "_")
-                file_name = f"{safe_title}.mp3"
-                download_folder = "downloads"
-                os.makedirs(download_folder, exist_ok=True)
-                file_path = os.path.join(download_folder, file_name)
-                
-                # Construct full download URL
-                download = f"{AMBOT}{download_url}"
-                print(f"Download URL: {download}")  # Debugging: print the full download URL
-
-                # Download the file
-                async with session.get(download) as file_response:
-                    with open(file_path, 'wb') as f:
-                        while True:
-                            chunk = await file_response.content.read(8192)
-                            if not chunk:
-                                break
-                            f.write(chunk)
-                    return file_path
-
-        except aiohttp.ClientError as e:
-            print(f"Network or client error occurred: {e}")
-        except Exception as e:
-            print(f"Error occurred while downloading song: {e}")
-
-    return None
 
 
 async def check_file_size(link):
@@ -408,17 +369,17 @@ class YouTubeAPI:
             x.download([link])
 
         if songvideo:
-            await download_song(link)
-            fpath = f"downloads/{link}.mp3"
+            await loop.run_in_executor(None, song_video_dl)
+            fpath = f"downloads/{title}.mp4"
             return fpath
         elif songaudio:
-            await download_song(link)
-            fpath = f"downloads/{link}.mp3"
+            await loop.run_in_executor(None, song_audio_dl)
+            fpath = f"downloads/{title}.mp3"
             return fpath
         elif video:
             if await is_on_off(1):
                 direct = True
-                downloaded_file = await download_song(link)
+                downloaded_file = await loop.run_in_executor(None, video_dl)
             else:
                 proc = await asyncio.create_subprocess_exec(
                     "yt-dlp",
@@ -447,8 +408,5 @@ class YouTubeAPI:
                    downloaded_file = await loop.run_in_executor(None, video_dl)
         else:
             direct = True
-            downloaded_file = await download_song(link)
+            downloaded_file = await loop.run_in_executor(None, audio_dl)
         return downloaded_file, direct
-
-
-
