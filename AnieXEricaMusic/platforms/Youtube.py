@@ -24,6 +24,8 @@ def cookie_txt_file():
 
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
+
+
 AMBOT = "http://s48swsks0cso04ks0k8gwgck.159.223.45.194.sslip.io/"
 async def download_song(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
