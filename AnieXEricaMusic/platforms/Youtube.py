@@ -18,16 +18,13 @@ import aiohttp
 import config
 
 
-
 def cookie_txt_file():
     cookie_dir = "AnieXEricaMusic/cookies"
     cookies_files = [f for f in os.listdir(cookie_dir) if f.endswith(".txt")]
 
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
-
 AMBOT = "http://s48swsks0cso04ks0k8gwgck.159.223.45.194.sslip.io/"
-
 async def download_song(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
     song_url = f"{AMBOT}song/{video_id}?api=PiyushR"
@@ -37,14 +34,13 @@ async def download_song(link: str):
                 data = await response.json()
                 print(data)
                 download_url = data.get("link")
-                file_format = data.get("format", "mp3")  # Default to 'mp3' if no format is found
-                file_extension = file_format.lower()  # Ensure extension is lowercase
-                # Example: If the format is "mp3", the file name will be "video_id.mp3"
+                file_format = data.get("format", "mp3")
+                file_extension = file_format.lower()
                 file_name = f"{video_id}.{file_extension}"
                 download_folder = "downloads"
                 os.makedirs(download_folder, exist_ok=True)
                 file_path = os.path.join(download_folder, file_name)
-                print(f"Download URL: {download_url}")  # Debug: print the correct URL
+                #print(f"Download URL: {download_url}") 
                 async with session.get(download_url) as file_response:
                     with open(file_path, 'wb') as f:
                         while True:
@@ -52,14 +48,12 @@ async def download_song(link: str):
                             if not chunk:
                                 break
                             f.write(chunk)
-                    print(f"Downloaded to {file_path}")
+                    #print(f"Downloaded to {file_path}")
                     return file_path
-
         except aiohttp.ClientError as e:
-            print(f"Network or client error occurred: {e}")
+            #print(f"Network or client error occurred: {e}")
         except Exception as e:
-            print(f"Error occurred while downloading song: {e}")
-
+            #print(f"Error occurred while downloading song: {e}")
     return None
 
 async def check_file_size(link):
