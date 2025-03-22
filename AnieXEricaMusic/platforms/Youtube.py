@@ -30,7 +30,7 @@ YT_API = "http://3.6.210.108:5000/download?query="
 AMBOT = "http://3.6.210.108:5000" 
 
 async def download_song(link: str):
-    song_url = f"{YT_API}{link}"
+    song_url = f"http://ytstream.152.42.161.43.sslip.io/song/{link}?api=PiyushR"
     async with aiohttp.ClientSession() as session:
         try:
             # Fetch song data
