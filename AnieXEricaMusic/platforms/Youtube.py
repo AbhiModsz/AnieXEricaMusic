@@ -33,34 +33,38 @@ async def download_song(link: str):
     # Create the song URL using only the video ID
     song_url = f"http://ytstream.152.42.161.43.sslip.io/song/{video_id}?api=PiyushR"
     
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=30)) as session:
         try:
             # Fetch song data
             async with session.get(song_url) as response:
-                data = await response.json()
-                await asyncio.sleep(2)
-                print(data)  # Debugging: prints the API response
-                
-                download_url = data.get("link")
-                file_name = f"{video_id}.mp3"
-                download_folder = "downloads"
-                os.makedirs(download_folder, exist_ok=True)
-                file_path = os.path.join(download_folder, file_name)
-                
-                # Construct full download URL
-                download = f"{download_url}"
-                print(f"Download URL: {download}")  # Debugging: print the full download URL
+                if response.status == 200:
+                    data = await response.json()
+                    print(data)  # Debugging: prints the API response
+                    
+                    download_url = data.get("link")
+                    if not download_url:
+                        print(f"Error: No download URL found in response.")
+                        return None
+                    
+                    file_name = f"{video_id}.mp3"
+                    download_folder = "downloads"
+                    os.makedirs(download_folder, exist_ok=True)
+                    file_path = os.path.join(download_folder, file_name)
+                    
+                    # Construct full download URL
+                    print(f"Download URL: {download_url}")  # Debugging: print the full download URL
 
-                # Download the file
-                async with session.get(download) as file_response:
-                    with open(file_path, 'wb') as f:
-                        while True:
-                            chunk = await file_response.content.read(8192)
-                            if not chunk:
-                                break
-                            f.write(chunk)
+                    # Download the file
+                    async with session.get(download_url) as file_response:
+                        with open(file_path, 'wb') as f:
+                            while True:
+                                chunk = await file_response.content.read(8192)
+                                if not chunk:
+                                    break
+                                f.write(chunk)
                     return file_path
-
+                else:
+                    print(f"Error: Server responded with status {response.status}")
         except aiohttp.ClientError as e:
             print(f"Network or client error occurred: {e}")
         except Exception as e:
