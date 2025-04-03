@@ -17,9 +17,9 @@ DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 600))
 
 LOG_GROUP_ID = int(getenv("LOG_GROUP_ID",-1002681494014))
 
-OWNER_ID = int(getenv("OWNER_ID", 7045191057))
+OWNER_ID = int(getenv("OWNER_ID", 7841017423))
 
-OWNER = int(getenv("OWNER", 7045191057))
+OWNER = int(getenv("OWNER", 7841017423))
 
 HEROKU_APP_NAME = getenv("HEROKU_APP_NAME",None)
 
