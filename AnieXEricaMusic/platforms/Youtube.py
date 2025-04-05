@@ -25,38 +25,42 @@ def cookie_txt_file():
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
 
-
-AMBOT = "http://s48swsks0cso04ks0k8gwgck.159.223.45.194.sslip.io/"
+AMBOT = "https://yt.zapto.org/api/?api_key=47dcbf3d6a62ebb6b4e8ad88edcb9b03fe6f4432a675eff2af6037c84008969d&url=https://www.youtube.com/watch?v="
 async def download_song(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
-    song_url = f"{AMBOT}song/{video_id}?api=PiyushR"
-    async with aiohttp.ClientSession() as session:
-        try:
+    song_url = f"{AMBOT}{video_id}"
+    try:
+        async with aiohttp.ClientSession() as session:
             async with session.get(song_url) as response:
-                data = await response.json()
-                print(data)
-                download_url = data.get("link")
-                file_format = data.get("format", "mp3")
-                file_extension = file_format.lower()
-                file_name = f"{video_id}.{file_extension}"
-                download_folder = "downloads"
-                os.makedirs(download_folder, exist_ok=True)
-                file_path = os.path.join(download_folder, file_name)
-                #print(f"Download URL: {download_url}") 
-                async with session.get(download_url) as file_response:
-                    with open(file_path, 'wb') as f:
-                        while True:
-                            chunk = await file_response.content.read(8192)
-                            if not chunk:
-                                break
-                            f.write(chunk)
-                    #print(f"Downloaded to {file_path}")
-                    return file_path
-        except aiohttp.ClientError as e:
-            #print(f"Network or client error occurred: {e}")
-        except Exception as e:
-            #print(f"Error occurred while downloading song: {e}")
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get('status') == 'success':
+                        download_url = data['download_link']
+                        download_folder = "downloads"
+                        if not os.path.exists(download_folder):
+                            os.makedirs(download_folder)
+                        file_name = download_url.split('/')[-1].split('?')[0]
+                        file_path = os.path.join(download_folder, file_name)
+                        async with session.get(download_url) as file_response:
+                            if file_response.status == 200:
+                                with open(file_path, 'wb') as f:
+                                    async for chunk in file_response.content.iter_chunked(1024):
+                                        if chunk:
+                                            f.write(chunk)
+                                return file_path
+                            else:
+                                print(f"Failed to download the file. Status code: {file_response.status}")
+                    else:
+                        print("Error: The API response does not contain a valid download link.")
+                else:
+                    print(f"Failed to retrieve data. Status code: {response.status}")
+    except aiohttp.ClientError as e:
+        print(f"Request failed: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    
     return None
+    
 
 async def check_file_size(link):
     async def get_format_info(link):
