@@ -24,7 +24,7 @@ def cookie_txt_file():
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
 
-def SS(video_id: str, link: str):
+def cookie(video_id: str, link: str):
     ydl_optssx = {
         "format": "bestaudio/best",
         "outtmpl": f"downloads/{video_id}.mp3",
@@ -87,7 +87,7 @@ async def handle_download(link):
     file_path = await download_song(link)
     if not file_path:
         print("Download failed via API. Trying with yt_dlp...")
-        file_path = await asyncio.to_thread(SS, video_id, link)
+        file_path = await asyncio.to_thread(cookie, video_id, link)
     return file_path
 
 async def check_file_size(link):
