@@ -28,7 +28,7 @@ def cookie_txt_file():
 async def AMBOT(video_id: str):
     yturl = f"https://www.youtube.com/watch?v={video_id}"
     cookie_file = cookie_txt_file()
-    outtmpl = "downloads/%(title)s.%(ext)s" 
+    outtmpl = "downloads/%{video_id}.mp3"  # The template for saving the file
     ydl_opts = {
         "quiet": True, 
         "cookiefile": cookie_file, 
@@ -40,11 +40,22 @@ async def AMBOT(video_id: str):
         }],
         "outtmpl": outtmpl,
     }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        await asyncio.to_thread(ydl.download, [yturl])
-    file_name = outtmpl.split("/")[1] 
-    file_path = os.path.join("downloads", file_name)
-    return file_path
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            await asyncio.to_thread(ydl.download, [yturl])
+        file_name = outtmpl.split("/")[1]
+        file_path = os.path.join("downloads", file_name)
+        if os.path.exists(file_path):
+            print(f"Download successful! File path: {file_path}")
+            return file_path
+        else:
+            print(f"Error: The file {file_name} could not be found at {file_path}")
+            return None
+
+    except Exception as e:
+        print(f"An error occurred in AMBOT: {e}")
+        return None
 
 #AMBOT = "https://yt.zapto.org/api/?api_key=47dcbf3d6a62ebb6b4e8ad88edcb9b03fe6f4432a675eff2af6037c84008969d&url=https://www.youtube.com/watch?v="
 AMBOT = "https://yt.zapto.org/api/?api_key=47dcbf3d6a62ebbe8ad88edcb9b03fe6f4432a675eff2af6037c84008969d&url=https://www.youtube.com/watch?v="
