@@ -25,6 +25,33 @@ def cookie_txt_file():
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
 
+
+def download_with_yt_dlp(link: str):
+    download_folder = "downloads"
+    if not os.path.exists(download_folder):
+        os.makedirs(download_folder)
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'), 
+        'postprocessors': [{
+            'key': 'FFmpegAudioConvertor',
+            'preferredcodec': 'mp3', 
+            'preferredquality': '192',
+        }],
+        'quiet': False,  
+        'cookiefile': cookie_txt_file(),  
+    }
+    
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            result = ydl.extract_info(link, download=True)
+            file_path = os.path.join(download_folder, f"{result['title']}.mp3")
+            print(f"Downloaded successfully with yt-dlp: {file_path}")
+            return file_path
+    except Exception as e:
+        print(f"Error downloading with yt-dlp: {e}")
+        return None
+
 AMBOT = "https://yt.zapto.org/api/?api_key=47dcbf3d6a62ebb6b4e8ad88edcb9b03fe6f4432a675eff2af6037c84008969d&url=https://www.youtube.com/watch?v="
 async def download_song(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
@@ -59,7 +86,7 @@ async def download_song(link: str):
     except Exception as e:
         print(f"An error occurred: {e}")
     
-    return None
+    return download_with_yt_dlp(link)
     
 
 async def check_file_size(link):
