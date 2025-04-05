@@ -24,8 +24,29 @@ def cookie_txt_file():
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
 
+
+async def AMBOT(video_id):
+    yturl = f"https://www.youtube.com/watch?v={video_id}"
+    cookie_file = cookie_txt_file()
+    outtmpl = "downloads/%(title)s.%(ext)s" 
+    ydl_opts = {
+        "quiet": True, 
+        "cookiefile": cookie_file, 
+        "format": "bestaudio/best",  
+        "postprocessors": [{ 
+            "key": "FFmpegAudioConvertor", 
+            "preferredcodec": "mp3",
+            "preferredquality": "192",
+        }],
+        "outtmpl": outtmpl,
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        await asyncio.to_thread(ydl.download, [yturl])
+    file_name = outtmpl.split("/")[1] 
+    file_path = os.path.join("downloads", file_name)
+    return file_path
+    
 AMBOT = "https://yt.zapto.org/api/?api_key=47dcbf3d6a62ebb6b4e8ad88edcb9b03fe6f4432a675eff2af6037c84008969d&url=https://www.youtube.com/watch?v="
-#AMBOT = "https://yt.zapto.org/api/?api_key=47dcbf3d645452ebb6b4e8ad88edcb9b03fe6f4432a675eff2af6037c84008969d&url=https://www.youtube.com/watch?v="
 async def download_song(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
     song_url = f"{AMBOT}{video_id}"
@@ -58,7 +79,7 @@ async def download_song(link: str):
         print(f"Request failed: {e}")
     except Exception as e:
         print(f"An error occurred: {e}")
-    return None
+    return await AMBOT(video_id)
     
 
 async def check_file_size(link):
