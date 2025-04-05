@@ -86,7 +86,7 @@ async def handle_download(link):
     video_id = link.split('v=')[-1].split('&')[0]
     file_path = await API_SONG(link)
     if not file_path:
-        print("Download failed via API. Trying with yt_dlp...")
+        print("Download failed via API. Trying with Cookies...")
         file_path = await asyncio.to_thread(COOKIE_SONG, video_id, link)
     return file_path
 
