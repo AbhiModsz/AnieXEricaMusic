@@ -47,8 +47,7 @@ def SS(video_id: str, link: str):
         print(f"An error occurred in SS: {e}")
         return None
 
-#AMBOT = "https://yt.zapto.org/api/?api_key=47dcbf3d6a62ebb6b4e8ad88edcb9b03fe6f4432a675eff2af6037c84008969d&url=https://www.youtube.com/watch?v="
-AMBOT = "https://yt.zapto.org/api/?api_key=47dcbf3d6a62ebbe8ad88edcb9b03fe6f4432a675eff2af6037c84008969d&url=https://www.youtube.com/watch?v="
+AMBOT = "https://yt.zapto.org/api/?api_key=47dcbf3d6a62ebb6b4e8ad88edcb9b03fe6f4432a675eff2af6037c84008969d&url=https://www.youtube.com/watch?v="
 async def download_song(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
     song_url = f"{AMBOT}{video_id}"
