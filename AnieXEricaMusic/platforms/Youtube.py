@@ -24,7 +24,7 @@ def cookie_txt_file():
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
 
-def cookie(video_id: str, link: str):
+def COOKIE_SONG(video_id: str, link: str):
     ydl_optssx = {
         "format": "bestaudio/best",
         "outtmpl": f"downloads/{video_id}.mp3",
@@ -48,7 +48,7 @@ def cookie(video_id: str, link: str):
         return None
 
 AMBOT = "https://yt.zapto.org/api/?api_key=47dcbf3d6a62ebb6b4e8ad88edcb9b03fe6f4432a675eff2af6037c84008969d&url=https://www.youtube.com/watch?v="
-async def download_song(link: str):
+async def API_SONG(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
     song_url = f"{AMBOT}{video_id}"
     try:
@@ -84,10 +84,10 @@ async def download_song(link: str):
     
 async def handle_download(link):
     video_id = link.split('v=')[-1].split('&')[0]
-    file_path = await download_song(link)
+    file_path = await API_SONG(link)
     if not file_path:
         print("Download failed via API. Trying with yt_dlp...")
-        file_path = await asyncio.to_thread(cookie, video_id, link)
+        file_path = await asyncio.to_thread(COOKIE_SONG, video_id, link)
     return file_path
 
 async def check_file_size(link):
