@@ -10,7 +10,7 @@ API_ID = int(getenv("API_ID", "6435225"))
 API_HASH = getenv("API_HASH", "4e984ea35f854762dcde906dce426c2d")
 BOT_PRIVACY = getenv("BOT_PRIVACY", "https://telegra.ph/Privacy-Policy-for-AnieXEricaMusic-10-06")
 #BOT_TOKEN = getenv("BOT_TOKEN", "7732030577:AAEpqfiwdOnFa7S-uDRAazyEcPWduPy_YHY")
-BOT_TOKEN = getenv("BOT_TOKEN", "7732030577:AAEpqfiwdOnFa7S-uDRAazyEcPWduPy_YHY")
+BOT_TOKEN = getenv("BOT_TOKEN", "8106761204:AAEIGTAZ74ioeY-9TwkuNAGCb52XJg-0Vo8")
 MONGO_DB_URI = getenv("MONGO_DB_URI", "mongodb+srv://jay:jay@jay.r2lxx.mongodb.net/?retryWrites=true&w=majority&appName=jay")
 
 DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 600))
