@@ -25,7 +25,7 @@ def cookie_txt_file():
     return cookie_file
 
 
-async def AMBOT(video_id):
+async def AMBOT(video_id: str):
     yturl = f"https://www.youtube.com/watch?v={video_id}"
     cookie_file = cookie_txt_file()
     outtmpl = "downloads/%(title)s.%(ext)s" 
@@ -80,8 +80,15 @@ async def download_song(link: str):
         print(f"Request failed: {e}")
     except Exception as e:
         print(f"An error occurred: {e}")
-    return await AMBOT(video_id)
+    return None
     
+async def handle_download(link):
+    file_path = await download_song(link)
+    if not file_path:
+        print("Download failed. Trying with yt_dlp...")
+        video_id = link.split('v=')[-1].split('&')[0]
+        file_path = await AMBOT(video_id)
+    return file_path
 
 async def check_file_size(link):
     async def get_format_info(link):
@@ -423,17 +430,17 @@ class YouTubeAPI:
             x.download([link])
 
         if songvideo:
-            await download_song(link)
+            await handle_download(link)
             fpath = f"downloads/{link}.mp3"
             return fpath
         elif songaudio:
-            await download_song(link)
+            await handle_download(link)
             fpath = f"downloads/{link}.mp3"
             return fpath
         elif video:
             if await is_on_off(1):
                 direct = True
-                downloaded_file = await download_song(link)
+                downloaded_file = await handle_download(link)
             else:
                 proc = await asyncio.create_subprocess_exec(
                     "yt-dlp",
@@ -462,7 +469,7 @@ class YouTubeAPI:
                    downloaded_file = await loop.run_in_executor(None, video_dl)
         else:
             direct = True
-            downloaded_file = await download_song(link)
+            downloaded_file = await handle_download(link)
         return downloaded_file, direct
 
 
