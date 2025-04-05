@@ -83,16 +83,18 @@ async def download_song(link: str):
     return None
     
 async def handle_download(link):
-    video_id = link.split('v=')[-1].split('&')[0]
-    print(f"Attempting to download from link: {link}")
-    file_path = await download_song(link)
-    if file_path:
-        download_source = "api"
-    else:
+    video_id = link.split('v=')[-1].split('&')[0] 
+    file_path = await download_song(link)  
+    API = "API"
+    if not file_path:
         print("Download failed via API. Trying with yt_dlp...")
-        file_path = await asyncio.to_thread(SS, video_id, link)
-        download_source = "cookies" if file_path else "unknown"
-    return file_path, download_source
+        try:
+            file_path = await asyncio.to_thread(SS, video_id, link)
+            API = "Cookie" 
+        except Exception as e:
+            print(f"Error during yt_dlp download: {e}")
+            file_path = None 
+    return file_path, API
 
 async def check_file_size(link):
     async def get_format_info(link):
