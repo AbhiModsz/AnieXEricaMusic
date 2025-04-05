@@ -24,37 +24,27 @@ def cookie_txt_file():
     cookie_file = os.path.join(cookie_dir, random.choice(cookies_files))
     return cookie_file
 
-
-async def AMBOT(video_id: str):
-    yturl = f"https://www.youtube.com/watch?v={video_id}"
-    cookie_file = cookie_txt_file()
-    outtmpl = "downloads/%{video_id}.mp3"  # The template for saving the file
-    ydl_opts = {
-        "quiet": True, 
-        "cookiefile": cookie_file, 
-        "format": "bestaudio/best",  
-        "postprocessors": [{ 
-            "key": "FFmpegAudioConvertor", 
-            "preferredcodec": "mp3",
-            "preferredquality": "192",
-        }],
-        "outtmpl": outtmpl,
+def SS(video_id: str, link: str):
+    ydl_optssx = {
+        "format": "bestaudio/best",
+        "outtmpl": f"downloads/{video_id}.mp3",
+        "geo_bypass": True,
+        "nocheckcertificate": True,
+        "quiet": True,
+        "cookiefile": cookie_txt_file(),
+        "no_warnings": True,
     }
 
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            await asyncio.to_thread(ydl.download, [yturl])
-        file_name = outtmpl.split("/")[1]
-        file_path = os.path.join("downloads", file_name)
-        if os.path.exists(file_path):
-            print(f"Download successful! File path: {file_path}")
+        with yt_dlp.YoutubeDL(ydl_optssx) as x:
+            info = x.extract_info(link, False)
+            file_path = os.path.join("downloads", f"{video_id}.mp3")
+            if os.path.exists(file_path):
+                return file_path
+            x.download([link])
             return file_path
-        else:
-            print(f"Error: The file {file_name} could not be found at {file_path}")
-            return None
-
     except Exception as e:
-        print(f"An error occurred in AMBOT: {e}")
+        print(f"An error occurred in SS: {e}")
         return None
 
 #AMBOT = "https://yt.zapto.org/api/?api_key=47dcbf3d6a62ebb6b4e8ad88edcb9b03fe6f4432a675eff2af6037c84008969d&url=https://www.youtube.com/watch?v="
@@ -94,11 +84,11 @@ async def download_song(link: str):
     return None
     
 async def handle_download(link):
+    video_id = link.split('v=')[-1].split('&')[0]
     file_path = await download_song(link)
     if not file_path:
-        print("Download failed. Trying with yt_dlp...")
-        video_id = link.split('v=')[-1].split('&')[0]
-        file_path = await AMBOT(video_id)
+        print("Download failed via API. Trying with yt_dlp...")
+        file_path = await asyncio.to_thread(SS, video_id, link)  
     return file_path
 
 async def check_file_size(link):
