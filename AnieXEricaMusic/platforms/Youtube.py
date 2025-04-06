@@ -42,6 +42,7 @@ def COOKIE_SONG(video_id: str, link: str):
             if os.path.exists(file_path):
                 return file_path
             x.download([link])
+            print("Song Downloaded From Cookies")
             return file_path
     except Exception as e:
         print(f"An error occurred in SS: {e}")
@@ -69,6 +70,7 @@ async def API_SONG(link: str):
                                     async for chunk in file_response.content.iter_chunked(1024):
                                         if chunk:
                                             f.write(chunk)
+                                print("Songe Downloaded From APi")
                                 return file_path
                             else:
                                 print(f"Failed to download the file. Status code: {file_response.status}")
