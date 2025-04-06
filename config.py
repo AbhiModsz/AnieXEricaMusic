@@ -10,16 +10,16 @@ API_ID = int(getenv("API_ID", "6435225"))
 API_HASH = getenv("API_HASH", "4e984ea35f854762dcde906dce426c2d")
 BOT_PRIVACY = getenv("BOT_PRIVACY", "https://telegra.ph/Privacy-Policy-for-AnieXEricaMusic-10-06")
 #BOT_TOKEN = getenv("BOT_TOKEN", "7732030577:AAEpqfiwdOnFa7S-uDRAazyEcPWduPy_YHY")
-BOT_TOKEN = getenv("BOT_TOKEN", "7745092579:AAG8TBzw0nvntykwi-oijAh5C-KFnDMjl74")
+BOT_TOKEN = getenv("BOT_TOKEN", "7546434205:AAG6sBTOai4R5Z5guYqv6bN-5gHIUk90yF4")
 MONGO_DB_URI = getenv("MONGO_DB_URI", "mongodb+srv://jay:jay@jay.r2lxx.mongodb.net/?retryWrites=true&w=majority&appName=jay")
 
 DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 600))
 
-LOG_GROUP_ID = int(getenv("LOG_GROUP_ID",-1002009251842))
+LOG_GROUP_ID = int(getenv("LOG_GROUP_ID",-1001741141734))
 
-OWNER_ID = int(getenv("OWNER_ID", 7841017423))
+OWNER_ID = int(getenv("OWNER_ID", 5265276618))
 
-OWNER = int(getenv("OWNER", 7841017423))
+OWNER = int(getenv("OWNER", 5265276618))
 
 HEROKU_APP_NAME = getenv("HEROKU_APP_NAME",None)
 
