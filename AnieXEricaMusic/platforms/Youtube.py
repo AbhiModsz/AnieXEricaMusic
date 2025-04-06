@@ -16,7 +16,7 @@ import random
 import logging
 import aiohttp
 import config
-from config import AMBOT
+from config import KEY
 
 def cookie_txt_file():
     cookie_dir = "AnieXEricaMusic/cookies"
@@ -48,7 +48,7 @@ def COOKIE_SONG(video_id: str, link: str):
         print(f"An error occurred in SS: {e}")
         return None
 
-
+AMBOT = f"https://yt.zapto.org/api/?api_key={KEY}&url=https://www.youtube.com/watch?v="
 async def API_SONG(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
     song_url = f"{AMBOT}{video_id}"
